@@ -105,17 +105,21 @@ def is_popperized(rootfolder):
 
 def fail(msg):
     """Prints the error message on the terminal."""
-    click.secho('ERROR: ' + msg, fg='red', bold=True, err=True, nl=False)
+    click.echo('\033[41;37;1m' + 'ERROR: ' + '\033[0m' + msg,
+               err=True, nl=False)
     sys.exit(1)
 
 
 def warn(msg):
-    click.secho('WARNING: ' + msg, bold=True, fg='red', err=True, nl=False)
+    click.echo('\033[31;1m' + 'WARNING: ' + '\033[0m' + msg,
+               err=True, nl=False)
 
 
-def info(msg, **styles):
+def info(prefix, action, msg):
     """Prints the message on the terminal."""
-    click.secho(msg, nl=False, **styles)
+    click.echo('\033[43;33;1m' + prefix +
+               '\033[46;30;1m' + action +
+               '\033[0;1m' + msg, nl=False)
 
 
 def print_yaml(msg, **styles):
@@ -153,13 +157,14 @@ def exec_cmd(cmd, verbose=False, debug=False, ignore_error=False,
     if not verbose and not log_file:
         out = ""
         if debug:
-            info('DEBUG: Using subprocess.check_output() for {}\n'.format(cmd))
+            info('', 'DEBUG:',
+                 ' Using subprocess.check_output() for {}\n'.format(cmd))
         try:
             out = check_output(cmd, shell=True, stderr=PIPE,
                                universal_newlines=True)
         except CalledProcessError as ex:
             if debug:
-                info('DEBUG: Catched exception: {}\n'.format(ex))
+                info('', 'DEBUG:',' Catched exception: {}\n'.format(ex))
             if not ignore_error:
                 fail("Command '{}' failed: {}\n".format(cmd, ex))
         return b(out).strip(), 0
@@ -173,28 +178,32 @@ def exec_cmd(cmd, verbose=False, debug=False, ignore_error=False,
     if log_file:
         if verbose:
             if debug:
-                info('\nDEBUG: Creating file for combined stdout/stderr\n')
+                info('', '\nDEBUG:',
+                     ' Creating file for combined stdout/stderr\n')
             outf = open(log_file + '.log', 'w')
         else:
             if debug:
-                info('\nDEBUG: Creating separate files for stdout/stderr\n')
+                info('', '\nDEBUG:',
+                     ' Creating separate files for stdout/stderr\n')
             outf = open(log_file + '.out', 'w')
             errf = open(log_file + '.err', 'w')
 
     try:
         if verbose:
             if debug:
-                info('DEBUG: subprocess.Popen() with combined stdout/stderr\n')
+                info('', 'DEBUG:',
+                     ' subprocess.Popen() with combined stdout/stderr\n')
             p = Popen(cmd, stdout=PIPE, stderr=STDOUT, shell=True,
                       universal_newlines=True)
         else:
             if debug:
-                info('DEBUG: subprocess.Popen() with separate stdout/stderr\n')
+                info('', 'DEBUG:',
+                     ' subprocess.Popen() with separate stdout/stderr\n')
             p = Popen(cmd, stdout=outf, stderr=errf, shell=True,
                       universal_newlines=True)
 
         if debug:
-            info('DEBUG: Reading process output\n')
+            info('', 'DEBUG:', ' Reading process output\n')
 
         while ecode is None:
 
@@ -202,7 +211,7 @@ def exec_cmd(cmd, verbose=False, debug=False, ignore_error=False,
                 # read until end of file (when process stops)
                 for line in iter(p.stdout.readline, ''):
                     line_decoded = b(line)
-                    info(line_decoded)
+                    info('', '', line_decoded)
                     if log_file:
                         outf.write(line)
             else:
@@ -215,23 +224,24 @@ def exec_cmd(cmd, verbose=False, debug=False, ignore_error=False,
                 num_times_point_at_current_sleep_time += 1
 
                 if debug:
-                    info('DEBUG: sleeping for {}\n'.format(sleep_time))
+                    info('', 'DEBUG:', ' sleeping for {}\n'.format(sleep_time))
                 else:
-                    info('.')
+                    info('', '', '.')
 
                 time.sleep(sleep_time)
 
             ecode = p.poll()
             if debug:
-                info('DEBUG: Code returned by process: {}\n'.format(ecode))
+                info('', 'DEBUG:',
+                     ' Code returned by process: {}\n'.format(ecode))
 
     except CalledProcessError as ex:
         msg = "Command '{}' failed: {}\n".format(cmd, ex)
         if not ignore_error:
             fail(msg)
-        info(msg)
+        info('', '', msg)
     finally:
-        info('\n')
+        info('', '', '\n')
         if outf:
             outf.close()
         if errf:

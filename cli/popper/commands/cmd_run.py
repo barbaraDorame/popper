@@ -74,7 +74,7 @@ def cli(ctx, action, wfile, workspace, reuse,
     if recursive:
         wfile_list = pu.find_recursive_wfile()
         for wfile in wfile_list:
-            pu.info("Found and running workflow at "+wfile+"\n")
+            pu.info('', '', "Found and running workflow at "+wfile+"\n")
             run_pipeline(action, wfile, workspace, reuse, quiet,
                          debug, dry_run, parallel)
     else:
@@ -87,24 +87,24 @@ def run_pipeline(action, wfile, workspace, reuse,
     pipeline = Workflow(wfile, workspace, quiet, debug, dry_run)
 
     if reuse:
-        pu.info(
+        pu.warn(
             "\n  " +
-            "WARNING: using --reuse ignores any changes made to an action" +
+            " using --reuse ignores any changes made to an action" +
             "\n  " +
-            "or to an action block in the workflow.\n\n"
+            " or to an action block in the workflow.\n\n"
         )
 
     if parallel:
-        pu.info(
+        pu.warn(
             "\n  " +
-            "WARNING: using --parallel may result in interleaved ouput." +
+            " using --parallel may result in interleaved ouput." +
             "\n  " +
-            "You may use --quiet flag to avoid confusion.\n\n"
+            " You may use --quiet flag to avoid confusion.\n\n"
         )
 
     pipeline.run(action, reuse, parallel)
 
     if action:
-        pu.info('\nAction "{}" finished successfully.\n\n'.format(action))
+        pu.info('', action, '\nAction finished successfully.\n\n')
     else:
-        pu.info('\nWorkflow finished successfully.\n\n')
+        pu.info('', '', '\nWorkflow finished successfully.\n\n')

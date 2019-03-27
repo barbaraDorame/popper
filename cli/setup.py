@@ -17,6 +17,7 @@ setup(
         'GitPython',
         'future; python_version == "2.7"',
         'spython',
+        'colorama',
         'click',
         'requests',
         'lark-parser==0.5.6',

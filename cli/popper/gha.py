@@ -237,7 +237,8 @@ class Workflow(object):
 
             if not self.dry_run:
                 if not infoed:
-                    pu.info('[popper] cloning actions from repositories\n')
+                    pu.info('', '[popper]',
+                            ' cloning actions from repositories\n')
                     infoed = True
 
                 scm.clone(url, user, repo, repo_parent_dir, version,
@@ -317,7 +318,7 @@ class Workflow(object):
                 for future in as_completed(flist):
                     try:
                         future.result()
-                        pu.info('Action ran successfully !\n')
+                        pu.info('', '', 'Action ran successfully !\n')
                     except Exception:
                         sys.exit(1)
         else:
@@ -443,16 +444,15 @@ class DockerRunner(ActionRunner):
         docker_cmd += ' {}'.format(img)
         docker_cmd += ' {}'.format(' '.join(self.action.get('args', '')))
 
-        pu.info('{}[{}] docker create {} {}\n'.format(
-            self.msg_prefix,
-            self.action['name'], img, ' '.join(self.action.get('args', ''))
+        pu.info(self.msg_prefix, '['+self.action['name']+']',
+                'docker create {} {}\n'.format(img, ' '.join(self.action.get('args', ''))
         ))
 
         pu.exec_cmd(docker_cmd, debug=self.debug, dry_run=self.dry_run)
 
     def docker_start(self):
-        pu.info('{}[{}] docker start \n'.format(self.msg_prefix,
-                                                self.action['name']))
+        pu.info(self.msg_prefix, '['+self.action['name']+']',
+                'docker start \n')
 
         cmd = 'docker start --attach {}'.format(self.cid)
         _, ecode = pu.exec_cmd(
@@ -461,15 +461,15 @@ class DockerRunner(ActionRunner):
         return ecode
 
     def docker_pull(self, img):
-        pu.info('{}[{}] docker pull {}\n'.format(self.msg_prefix,
-                                                 self.action['name'], img))
+        pu.info(self.msg_prefix, '['+self.action['name']+']',
+                'docker pull {}\n'.format(img))
         pu.exec_cmd('docker pull {}'.format(img),
                     debug=self.debug, dry_run=self.dry_run)
 
     def docker_build(self, tag, path):
         cmd = 'docker build -t {} {}'.format(tag, path)
-        pu.info('{}[{}] {}\n'.format(self.msg_prefix,
-                                     self.action['name'], cmd))
+        pu.info(self.msg_prefix, '['+self.action['name']+']',
+                '{}\n'.format(cmd))
         pu.exec_cmd(cmd, debug=self.debug, dry_run=self.dry_run)
 
 
@@ -590,8 +590,8 @@ class HostRunner(ActionRunner):
 
         os.environ.update(self.action.get('env', {}))
 
-        pu.info('{}[{}] {}\n'.format(self.msg_prefix, self.action['name'],
-                                     ' '.join(cmd)))
+        pu.info(self.msg_prefix, '['+self.action['name']+']',
+                '{}\n'.format(' '.join(cmd)))
 
         _, ecode = pu.exec_cmd(
             ' '.join(cmd), verbose=(not self.quiet), debug=self.debug,

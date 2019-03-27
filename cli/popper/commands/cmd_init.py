@@ -22,4 +22,4 @@ def cli(ctx):
         f.write(pu.gitignore_content)
 
     # write README
-    pu.info('Popperized repository {}\n'.format(project_root))
+    pu.info('', '', 'Popperized repository {}\n'.format(project_root))

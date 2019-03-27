@@ -45,4 +45,4 @@ def cli(ctx):
     with open(os.path.join(actions_dir, 'example/README.md'), 'w') as rf:
         rf.write(pu.readme_content)
 
-    pu.info('Successfully scaffolded. \n')
+    pu.info('', '', 'Successfully scaffolded. \n')
