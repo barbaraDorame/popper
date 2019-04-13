@@ -10,6 +10,7 @@ import popper.scm as scm
 from spython.main import Client
 import sys
 import popper.cli
+import vagrant
 from distutils.dir_util import copy_tree
 
 
@@ -397,6 +398,16 @@ class ActionRunner(object):
         raise NotImplementedError(
             "This method is required to be implemented in derived classes."
         )
+
+class VagrantRunner(ActionRunner):
+    """ Vagrant ActionRunner class
+    """
+    def __init__():
+        super(VagrantRunner, self).__init__(action, workspace, env, q, d, dry)
+        self.cib = self.action['name'].replace(' ', '_')
+        self.v = vagrant.Vagrant()
+
+    def start(self, reuse):
 
 
 class DockerRunner(ActionRunner):
