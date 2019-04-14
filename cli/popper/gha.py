@@ -404,10 +404,46 @@ class VagrantRunner(ActionRunner):
     """
     def __init__():
         super(VagrantRunner, self).__init__(action, workspace, env, q, d, dry)
-        self.cib = self.action['name'].replace(' ', '_')
-        self.v = vagrant.Vagrant()
+        self.bid = self.action['name'].replace(' ', '_')
 
-    def start(self, reuse):
+    def run(self, reuse):
+        build = True
+
+        if 'vagrant://' in self.action['uses']:
+            tag = self.action['uses'].replace('vagrant://', '')
+            build = False
+        elif './' in self.action['uses']:
+            action_dir = os.path.basename(
+                self.action['uses'].replace('./', ''))
+
+            if self.env['GITHUB_REPOSITORY'] == 'unknown':
+                repo_id = ''
+            else:
+                repo_id = self.env['GITHUB_REPOSITORY']
+
+                if action_dir:
+                    repo_id += '/'
+
+            tag = (
+                'popper/' + repo_id + action_dir + ':' + self.env['GITHUB_SHA']
+            )
+
+            vagrantfile_path = os.path.join(os.getcwd(), self.action['uses'])
+        else:
+            tag = '/'.join(self.action['uses'].split('/')[:2])
+            vagrant_path = os.path.join(self.action['repo_dir'],
+                                           self.action['action_dir']
+
+        if not reuse:
+            if self.vagrant_exists():
+                self.vagrant_destroy()
+            self.vagrant_up(tag, vagrantfile_path)
+
+        e = self.vagrant_up()
+
+        if e != 0:
+            pu.fail('Action {} failed!\n'.format(self.action['name']))
+    def up(self):
 
 
 class DockerRunner(ActionRunner):
